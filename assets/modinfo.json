@@ -2,7 +2,7 @@
     "type": "code",
     "modid": "fillmybloomery",
     "name": "Fill My Bloomery",
-    "description": "Adds the ability to fully fill bloomeries in one click by holding control and shift when depositing. A recreation of \"One Click Fill for Bloomery\" by ArcadianPig.",
+    "description": "Adds the ability to fully fill bloomeries in one click by holding control and shift when depositing.",
     "authors": [ "Cecer" ],
     "contributors": [ "ArcadianPig" ],
     "version": "1.0.0",
