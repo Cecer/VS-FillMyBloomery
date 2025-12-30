@@ -20,11 +20,13 @@ public class FillMyBloomeryModSystem : ModSystem
     public override void StartClientSide(ICoreClientAPI api)
     {
         _harmony!.PatchCategory("client");
+        _harmony!.PatchCategory("common");
     }
 
     public override void StartServerSide(ICoreServerAPI api)
     {
         _harmony!.PatchCategory("server");
+        _harmony!.PatchCategory("common");
     }
 
     public override void Dispose()
