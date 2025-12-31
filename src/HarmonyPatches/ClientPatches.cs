@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
-using System.Threading;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Vintagestory.API.Client;
