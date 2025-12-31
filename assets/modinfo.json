@@ -5,7 +5,7 @@
     "description": "Adds the ability to fully fill bloomeries in one click by holding control and shift when depositing.",
     "authors": [ "Cecer" ],
     "contributors": [ "ArcadianPig" ],
-    "version": "1.0.1-rc.1",
+    "version": "1.0.1",
     "dependencies": { 
         "game": "1.21.6"
     },
