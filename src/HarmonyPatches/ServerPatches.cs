@@ -4,6 +4,7 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Vintagestory.API.Common;
+using Vintagestory.API.Datastructures;
 using Vintagestory.GameContent;
 
 namespace FillMyBloomery.HarmonyPatches;
@@ -22,6 +23,8 @@ public static class ServerPatches
     /// After:
     ///   <code>
     ///     (combustibleProps.SmeltedRatio * 6) - OreSlot.StackSize
+    ///
+    ///     (activeHotbarSlot.Itemstack.ItemAttributes?["bloomeryFuelRatio"].AsInt(combustibleProps.SmeltedRatio) * 6) - OreSlot.StackSize
     ///   </code>
     /// </remarks>
     [HarmonyTranspiler]
@@ -54,11 +57,52 @@ public static class ServerPatches
         );
         matcher.ThrowIfNotMatch("Failed to match expected opcodes in BlockEntityBloomery.TryAdd");
 
+        matcher.DefineLabel(out var nullItemAttributesLabel);
+        matcher.DefineLabel(out var multiplyBySixLabel);
+
         matcher.RemoveInstructions(2);
+
         matcher.Insert(
+            // activeHotbarSlot.Itemstack.ItemAttributes
+            new CodeInstruction(OpCodes.Ldloc_0), // activeHotbarSlot
+            new CodeInstruction(OpCodes.Callvirt, typeof(ItemSlot).PropertyGetter(nameof(ItemSlot.Itemstack))),
+            new CodeInstruction(OpCodes.Callvirt, typeof(ItemStack).PropertyGetter(nameof(ItemStack.ItemAttributes))),
+
+            // Branch if ItemAttributes is null
+            new CodeInstruction(OpCodes.Dup),
+            new CodeInstruction(OpCodes.Brfalse_S, nullItemAttributesLabel),
+
+
+
+            // PATH: When ItemAttributes is not null
+            // {activeHotbarSlot.Itemstack.ItemAttributes}["bloomeryFuelRatio"]
+            new CodeInstruction(OpCodes.Ldstr, "bloomeryFuelRatio"),
+            new CodeInstruction(OpCodes.Callvirt, typeof(JsonObject).IndexerGetter([ typeof(string) ])),
+
+            // combustibleProps.SmeltedRatio
             new CodeInstruction(OpCodes.Ldloc_1), // combustibleProps
             new CodeInstruction(OpCodes.Ldfld, typeof(CombustibleProperties).Field(nameof(CombustibleProperties.SmeltedRatio))),
-            new CodeInstruction(OpCodes.Ldc_I4_6),
+
+            // {activeHotbarSlot.Itemstack.ItemAttributes["bloomeryFuelRatio"]}.AsInt({combustibleProps.SmeltedRatio})
+            new CodeInstruction(OpCodes.Callvirt, typeof(JsonObject).Method(nameof(JsonObject.AsInt), [ typeof(int) ])),
+
+            // {activeHotbarSlot.Itemstack.ItemAttributes["bloomeryFuelRatio"].AsInt({combustibleProps.SmeltedRatio})}
+            new CodeInstruction(OpCodes.Br_S, multiplyBySixLabel),
+
+
+
+            // PATH: When ItemAttributes is null
+            new CodeInstruction(OpCodes.Pop).WithLabels(nullItemAttributesLabel),
+
+            // combustibleProps.SmeltedRatio * 6
+            new CodeInstruction(OpCodes.Ldloc_1), // combustibleProps
+            new CodeInstruction(OpCodes.Ldfld, typeof(CombustibleProperties).Field(nameof(CombustibleProperties.SmeltedRatio))),
+
+
+
+            // PATH: Always
+            // Multiply the result by 6
+            new CodeInstruction(OpCodes.Ldc_I4_6).WithLabels(multiplyBySixLabel),
             new CodeInstruction(OpCodes.Mul)
         );
 
