@@ -1,0 +1,16 @@
+{
+    "type": "code",
+    "modid": "fillmybloomery",
+    "name": null,
+    "description": null,
+    "authors": null,
+    "contributors": [ "ArcadianPig" ],
+    "version": null,
+    "website": null,
+    "dependencies": {
+        "game": "1.21.6"
+    },
+    "side": "Universal",
+    "requiredOnClient": true,
+    "requiredOnServer": true
+}
